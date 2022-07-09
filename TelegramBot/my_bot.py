@@ -11,6 +11,7 @@ def start(message):
     markup.add(btn1, btn2)
     bot.send_message(message.chat.id, text="Я твой личный органайзер. Выбери что необходимо сделать".format(message.from_user), reply_markup=markup)
 
+
 @bot.message_handler(content_types=['text'])
 def get_text_messages(message):
     if message.text == 'Таймер':
