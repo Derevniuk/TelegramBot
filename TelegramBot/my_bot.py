@@ -1,8 +1,10 @@
 from telebot import types
 from settnigs import bot
-from services import my_timer, my_alarm, time_calculation
+from services import my_timer, my_alarm, time_calculation, my_alert
 
-bd = []
+bd_note = []
+bd_alert = []
+
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -10,7 +12,8 @@ def start(message):
     btn_1 = types.KeyboardButton("Alarm")
     btn_2 = types.KeyboardButton("Timer")
     btn_3 = types.KeyboardButton("Notes")
-    markup.add(btn_1, btn_2, btn_3)
+    btn_4 = types.KeyboardButton("Alert")
+    markup.add(btn_1, btn_2, btn_3, btn_4)
     bot.send_message(message.chat.id, text="I am your personal organizer. Choose what needs to be done.".format(message.from_user), reply_markup=markup)
 
 
@@ -20,7 +23,8 @@ def next_star(message):
     btn_1 = types.KeyboardButton("Alarm")
     btn_2 = types.KeyboardButton("Timer")
     btn_3 = types.KeyboardButton("Notes")
-    markup.add(btn_1, btn_2, btn_3)
+    btn_4 = types.KeyboardButton("Alert")
+    markup.add(btn_1, btn_2, btn_3, btn_4)
     bot.send_message(message.chat.id,
                      text="Main menu".format(message.from_user), reply_markup=markup)
 
@@ -91,31 +95,49 @@ def get_timer(message):
     if message.text == "Add note":
         bot.send_message(message.from_user.id, 'To add a note, type: add_(note content)')
     if message.text.split('_')[0].lower() == 'add':
-        bd.append(message.text[4:])
-        bot.send_message(message.from_user.id, f'Added {len(bd)} note')
+        bd_note.append(message.text[4:])
+        bot.send_message(message.from_user.id, f'Added {len(bd_note)} note')
     if message.text == "Show notes":
-        for one_bd in bd:
-            bot.send_message(message.from_user.id, f'{bd.index(one_bd) + 1}. {one_bd}')
+        for one_bd in bd_note:
+            bot.send_message(message.from_user.id, f'{bd_note.index(one_bd) + 1}. {one_bd}')
     if message.text == "Delete note":
         bot.send_message(message.from_user.id, 'To delete a note write(Del_number note)')
     if message.text.split('_')[0].lower() == 'del':
-        if message.text.split('_')[1].isdecimal() and int(message.text.split('_')[1]) <= len(bd) and \
+        if message.text.split('_')[1].isdecimal() and int(message.text.split('_')[1]) <= len(bd_note) and \
                 int(message.text.split('_')[1]) != 0:
             stung_note_index = int(message.text.split('_')[1])
-            bd.pop(stung_note_index - 1)
+            bd_note.pop(stung_note_index - 1)
             bot.send_message(message.from_user.id, f'Note number {stung_note_index} deleted')
         else:
             bot.send_message(message.from_user.id, 'Enter the correct value!!!')
     if message.text == "Edit note":
         bot.send_message(message.from_user.id, 'For note names, type(edi_(note number)_(edited note text)))')
     if message.text.split('_')[0].lower() == 'edi':
-        if message.text.split('_')[1].isdecimal() and int(message.text.split('_')[1]) <= len(bd) and \
+        if message.text.split('_')[1].isdecimal() and int(message.text.split('_')[1]) <= len(bd_note) and \
                 int(message.text.split('_')[1]) != 0:
             stung_note_index = int(message.text.split('_')[1])
-            bd[int(message.text.split('_')[1]) - 1] = (message.text.split('_')[2])
+            bd_note[int(message.text.split('_')[1]) - 1] = (message.text.split('_')[2])
             bot.send_message(message.from_user.id, f'Note number {stung_note_index} changed')
         else:
             bot.send_message(message.from_user.id, 'Enter the correct value!!!')
+    if message.text == "Alert":
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        btn_1 = types.KeyboardButton("Add alert")
+        btn_2 = types.KeyboardButton("Show alert")
+        btn_3 = types.KeyboardButton("Delete alert")
+        btn_4 = types.KeyboardButton("Main menu")
+        markup.add(btn_1, btn_2, btn_3, btn_4)
+        bot.send_message(message.chat.id,
+                         text="Choose your course of action".format(message.from_user),
+                         reply_markup=markup)
+    if message.text == "Add alert":
+        bot.send_message(message.from_user.id, 'To add a note, type: aadd_(time_alert(hour:min)_(text alert))')
+    if message.text.split('_')[0].lower() == 'aadd':
+        bd_alert.append(message.text[11:])
+        next_star(message)
+        my_alert(message, int(message.text.split('_')[1].split(':')[1]), int(message.text.split('_')[1].split(':')[0]),
+                 bd_alert[0])
+
 
 
 bot.polling(none_stop=True, interval=0)
